@@ -6,7 +6,8 @@ const storeController = require('../controllers/storeController');
 //object destructuring lets us import an entire object. we are importing the one method we need.
 const {catchErrors} = require('../handlers/errorHandlers');
 
-router.get('/', storeController.homePage);
+router.get('/', catchErrors(storeController.getStores));
+router.get('/stores', catchErrors(storeController.getStores));
 router.get('/add', storeController.addStore);
 router.post('/add', catchErrors(storeController.createStore));
 //router.get('/', (req, res) => {

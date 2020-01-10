@@ -27,3 +27,10 @@ exports.createStore = async (req, res) => {
     // // console.log(req.body);
     // // res.json(req.body);
 };
+exports.getStores = async(req, res) => {
+    // 1. query the db for a list of all stores
+    const stores = await Store.find(); // query db for all stores, can be modified
+    // console.log(stores); // Stores is an array. We can give this to our template and loop over it.
+    res.render('stores', {title:'Stores', stores}); //If property name is same as variable name, you can just pass the variable.
+
+};
