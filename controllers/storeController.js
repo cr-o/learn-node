@@ -17,6 +17,7 @@ exports.addStore = (req, res) => {
 
 exports.createStore = async (req, res) => {
     const store = await (new Store(req.body)).save(); // pass from body to store
+    //this fails if validation does not pass. error handler calls next and goes to chain of error handlers in app.js and to flashValidationErrors, and redirects back without updating
     //the response from awaiting from save will let us access slug. otherwise we don't have slug because it is automatically generated.
     await store.save();
     console.log('It worked!');
