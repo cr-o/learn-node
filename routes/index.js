@@ -10,6 +10,8 @@ router.get('/', catchErrors(storeController.getStores));
 router.get('/stores', catchErrors(storeController.getStores));
 router.get('/add', storeController.addStore);
 router.post('/add', catchErrors(storeController.createStore));
+router.post('/add/:id', catchErrors(storeController.updateStore));
+router.get('/stores/:id/edit', catchErrors(storeController.editStore));
 //router.get('/', (req, res) => {
   // res.send('Hey! It works!');
   // res.render('hello', {name: 'myDog', dog: req.query.dog, title: 'working title'});
