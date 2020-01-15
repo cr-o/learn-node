@@ -55,7 +55,18 @@ storeSchema.pre('save', async function(next){ // pure function needed because we
         this.slug = `${this.slug}-${storesWithSlug.length + 1}`;
     }
     next();
-    // TODO make resiliant for unique slugs
 });
+
+// add method to schema by adding to statics
+storeSchema.statics.getTagsList = function (){ // need to use proper function to have this bound to the model Store, do not use arrow function here
+    return this.aggregate([ // mongoDB method that takes array of possible operators
+        // passing an object for each pipeline operator
+        // using unwind first before grouping all the items by the number of tags
+        // unwind lets us tally up one store for each type of tag it contains
+        {$unwind: '$tags'},  // dollar sign to indicate field in document
+        {$group:{_id:'$tags', count:{$sum:1}}}, // we then group everything based on tag field and are creating a new field called count in each of those groups called count. each time group is called, count sums itself (adds one)
+        {$sort: {count: -1}} // sort by descending
+    ]); 
+};
 
 module.exports = mongoose.model('Store', storeSchema);
