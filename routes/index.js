@@ -28,4 +28,6 @@ router.get('/stores/:id/edit', catchErrors(storeController.editStore));
   // res.render('hello', {name: 'myDog', dog: req.query.dog, title: 'working title'});
 //});
 
+router.get('/store/:slug', catchErrors(storeController.getStoreBySlug));
+
 module.exports = router;
