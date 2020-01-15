@@ -105,7 +105,14 @@ exports.getStoreBySlug = async(req, res, next) => {
 };
 
 exports.getStoresByTag = async(req, res, next) => {
-    const tags = await Store.getTagsList(); // custom method added to Store
     const tag = req.params.tag;
-    res.render('tags', {tags, title: 'Tags', tag});
+    const tagQuery = tag || {$exists:true} // if no tag, then this second option says to give any store that has a tag property on it. This shows all the stores in the default tag view with no specific tag seleected
+    const tagsPromise = Store.getTagsList(); // custom method added to Store
+    const storesPromise = Store.find({tags: tagQuery}); // finds all the stores where tags property of a store includes that specific tag
+    // now you have two promises but no way resolved data. use Promise.all and await that promise
+    const [tags, stores] = await Promise.all([tagsPromise, storesPromise]) // this waits for all the promises to resolve, but NOT wait synchronously where you wait for each individual one after another
+    // instead of below, you can destruct the results to their own variables as above
+    // var tags = result[0];
+    // var stores = result[1];
+    res.render('tags', {tags, title: 'Tags', tag, stores});
 };
