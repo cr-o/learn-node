@@ -1,6 +1,23 @@
 
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store'); // getting export at end of store.js
+const multer = require('multer');
+const jimp = require('jimp');
+const uuid = require('uuid'); // unique identifiers for every single image
+
+const multerOptions = { // decide where to store files and which types of files are allowed
+    storage: multer.memoryStorage(), // saving to memory, since we will read, resize, and save the final resized version
+    // fileFilter: function(req, file, next){ // old style, using ES6 style instead
+    // }
+    fileFilter(req, file, next){
+        const isPhoto = file.mimetype.startsWith('image/') // this tells us what type of photo the file is. extension types are not dependable
+        if(isPhoto){
+            next(null, true); // old school callback often seen in node.js. null as first generally signals it worked, and we are passing the second value
+        }else{
+            next({message: 'That filetype isn\'t allowed!'}, false);
+        }
+    }
+};
 
 exports.homePage = (req, res) => {
     console.log(req.name);
@@ -14,6 +31,24 @@ exports.homePage = (req, res) => {
 exports.addStore = (req, res) => {
     res.render('editStore' , {title: 'Add Store'});
 };
+
+exports.upload = multer(multerOptions).single('photo'); // we just want a single field called photo
+// this is just in the memory of the server, so it is temporary
+
+exports.resize = async (req, res, next) => { // next because this is middleware, we won't be rendering or sending things back to the client, and instead are just saving the image, recording its name, and passing along data to the store
+// we are not uploading a new file every time we edit our store, so check if there is no new file to resize
+    if(!req.file){ // multer puts the actual file onto the file property of the request
+        next(); // skip to the next middleware, createStore
+        return;
+    }
+    const extension = req.file.mimetype.split('/')[1]; // get extension piece of array after split
+    req.body.photo = `${uuid.v4()}.${extension}`;// put on body to store to database. generate unique string
+    const photo = await jimp.read(req.file.buffer); // to resize photo. Buffer is representation of file in memory. jimp is promise based so we can await it.
+    await photo.resize(800, jimp.AUTO); // resize, height is auto
+    await photo.write(`./public/uploads/${req.body.photo}`);
+    // resized photo is written to file system, so keep going
+    next();
+}
 
 exports.createStore = async (req, res) => {
     const store = await (new Store(req.body)).save(); // pass from body to store
@@ -49,6 +84,8 @@ exports.editStore = async(req, res) => {
 };
 
 exports.updateStore = async(req, res) => {
+    // set the location data to be a point
+    req.body.location.type = 'Point'; // needs this as default
     // find and update the store
     // mongoDB method to find and update at the same time
     const store = await Store.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, runValidators: true}).exec();

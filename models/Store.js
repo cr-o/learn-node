@@ -33,7 +33,8 @@ const storeSchema = new mongoose.Schema({
             type: String,
             required: 'You must supply an address!'
         }
-    }
+    },
+    photo: String
 });
 
 storeSchema.pre('save', function(next){ // pure function needed because we need this to be equal to be store that we are trying to save
