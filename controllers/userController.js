@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const User = mongoose.model('User'); // possible because already imported
+const promisify = require('es6-promisify');
 
 exports.loginForm = (req, res) => {
     res.render('login', {title: 'Login'});
@@ -14,12 +16,13 @@ exports.validateRegister = (req, res, next) => {
     req.sanitizeBody('name'); // in app.js we imported expressValidator, which applies validation methods to every single request
     req.checkBody('name', 'You must supply a name!').notEmpty();
     req.checkBody('email', 'That email is not valid!').isEmail();
-    req.sanitizeBody('name', 'You must supply a name!').normalizeEmail({
+    req.sanitizeBody('email').normalizeEmail({
         remove_dots: false,
         remove_extension: false,
         gmail_remove_subaddress: false
     });
     req.checkBody('password', 'Password cannot be blank!').notEmpty();
+    req.checkBody('password-confirm', 'Confirmed password cannot be blank!').notEmpty();
     req.checkBody('password-confirm', 'Your passwords do not match').equals(req.body.password);
 
     const errors = req.validationErrors(); //actually runs all above functions to check for errors
@@ -30,4 +33,15 @@ exports.validateRegister = (req, res, next) => {
         return; // stop it from running
     }
     next();
+};
+
+exports.register = async (req, res, next) => {
+    // import user
+    const user = new User({email: req.body.email, name: req.body.name});
+    // using the plugin passportLocalMongoose exposes register method, which takes care of low level registration
+    // User.register(user, req.body.password, function(){ // doesn't return promise, is callback based library
+    // }); // make user using model
+    const register = promisify(User.register, User); // use promisify. pass method and object to bind to. if method lives on some object like User, you need to pass User again
+    await register(user, req.body.password); // it stores hash of password in database
+    next(); // pass to authController.login
 };

@@ -21,7 +21,7 @@ mongoose.connection.on('error', (err) => {
 
 // import all of our models. need to only do once. a singleton that mongo will know aobut
 require('./models/Store');
-
+require('./models/User');
 // Start our app!
 const app = require('./app');
 app.set('port', process.env.PORT || 7777);
