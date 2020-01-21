@@ -22,6 +22,13 @@ const userSchema = new Schema({
     }
 });
 
+userSchema.virtual('gravatar').get(function(){ // make a virtual field to make a globally recognized avatar
+    // this isn't adding a new field. this is not stored in the database, but instead it is generated and pulled up by a virtual field called gravatar
+    // gravatar using a hashing algorithm called md5 to hash the user's email
+    const hash = md5(this.email); // proper function allows us to access email via this
+    return `https://gravatar.com/avatar/${hash}?s=200`;
+});
+
 userSchema.plugin(passportLocalMongoose, {usernameField: 'email'}); // add plugin to add authentication to schema. email will be login field
 userSchema.plugin(mongodbErrorHandler); // makes errors more viewable to users
 
