@@ -50,4 +50,8 @@ router.post('/register',
 
 router.get('/logout', authController.logout);
 
+router.get('/account', authController.isLoggedIn, userController.account); // if logged in, redirect to account page
+
+router.post('/account', catchErrors(userController.updateAccount)); // when user posts form to update in account page
+
 module.exports = router;

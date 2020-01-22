@@ -45,3 +45,22 @@ exports.register = async (req, res, next) => {
     await register(user, req.body.password); // it stores hash of password in database
     next(); // pass to authController.login
 };
+
+exports.account = (req, res) => {
+    res.render('account', {title: 'Edit your account'});
+};
+
+exports.updateAccount =  async (req, res, next) => {
+    const updates = {
+        name: req.body.name, 
+        email: req.body.email
+    };
+
+    const user = await User.findOneAndUpdate( // query, updates, options
+        { _id: req.user._id}, // get it from the request
+        {$set: updates}, // take updates and set it on top of what already exists
+        {new: true, runValidators:true, context: 'query'} // returns new actual user, run validators, context is required for mongoose to do query
+    );
+    req.flash('success', 'Updated the profile!');
+    res.redirect('back');
+};
