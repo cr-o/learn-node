@@ -53,5 +53,11 @@ router.get('/logout', authController.logout);
 router.get('/account', authController.isLoggedIn, userController.account); // if logged in, redirect to account page
 
 router.post('/account', catchErrors(userController.updateAccount)); // when user posts form to update in account page
+router.post('/account/forgot', catchErrors(authController.forgot));
+router.get('/account/reset/:token', catchErrors(authController.reset));
+router.post('/account/reset/:token', 
+  authController.confirmedPasswords,
+  catchErrors(authController.update)
+);
 
 module.exports = router;

@@ -19,7 +19,9 @@ const userSchema = new Schema({
         type: 'String',
         required: true,
         trim: true
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date
 });
 
 userSchema.virtual('gravatar').get(function(){ // make a virtual field to make a globally recognized avatar
