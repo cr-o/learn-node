@@ -51,6 +51,7 @@ exports.resize = async (req, res, next) => { // next because this is middleware,
 }
 
 exports.createStore = async (req, res) => {
+    req.body.author = req.user._id; // set author as current user's id
     const store = await (new Store(req.body)).save(); // pass from body to store
     //this fails if validation does not pass. error handler calls next and goes to chain of error handlers in app.js and to flashValidationErrors, and redirects back without updating
     //the response from awaiting from save will let us access slug. otherwise we don't have slug because it is automatically generated.
@@ -72,12 +73,19 @@ exports.getStores = async(req, res) => {
 
 };
 
+const confirmOwner = (store, user) => {
+    if (!store.author.equals(user._id)){
+        throw Error('You must own a store in order ot edit it!');
+    }
+}
+
 exports.editStore = async(req, res) => {
     // 1. find ths store given the ID
     // res.json(req.params);
     const store = await Store.findOne({_id: req.params.id}) // mongoDB query method to find store by id. the id is coming from our route
     // res.json(store);
     // 2. confirm they are the owner of the store
+    confirmOwner(store, req.user);
     // TODO once we have login session stuff
     // 3. render out the edit form so the user can update their store
     res.render('editStore', {title: `Edit ${store.name}`, store});
@@ -99,7 +107,7 @@ exports.updateStore = async(req, res) => {
 };
 
 exports.getStoreBySlug = async(req, res, next) => {
-    const store = await Store.findOne({slug: req.params.slug});
+    const store = await (await Store.findOne({slug: req.params.slug})).populate('author'); // populate actually brings the data of user associated as the author
     if(!store) return next();
     res.render('store', {store, title:store.name});
 };

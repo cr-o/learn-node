@@ -34,7 +34,12 @@ const storeSchema = new mongoose.Schema({
             required: 'You must supply an address!'
         }
     },
-    photo: String
+    photo: String,
+    author: {
+        type: mongoose.Schema.ObjectId, // ids are actually of their own type, an ObjectId
+        ref: 'User', // author is going to be referenced to the user
+        required: 'You must supply an author'
+    }
 });
 
 // make this async to see if stores with slug already exists
