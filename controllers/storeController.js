@@ -124,3 +124,23 @@ exports.getStoresByTag = async(req, res, next) => {
     // var stores = result[1];
     res.render('tags', {tags, title: 'Tags', tag, stores});
 };
+
+exports.searchStores = async(req, res) => {
+    // res.json(req.query);
+    // because we made an index, we can use the $text operator, which performs a text search on the content od the fields indexed with a text index.
+    // find stores that match
+    const stores = await Store.find({
+        $text:{
+            $search: req.query.q
+        }
+    }, {
+        score: { $meta: 'textScore' }
+    })
+    // sort results
+    .sort({
+        score: { $meta: 'textScore'}
+    })
+    // limit to 5 results
+    .limit(5);
+    res.json(stores);
+}

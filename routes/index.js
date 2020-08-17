@@ -60,4 +60,10 @@ router.post('/account/reset/:token',
   catchErrors(authController.update)
 );
 
+/*
+  API ENDPOINTS
+*/
+// run searchStores method with error catching when we run search
+router.get('/api/search', catchErrors(storeController.searchStores));
+
 module.exports = router;

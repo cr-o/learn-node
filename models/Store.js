@@ -42,6 +42,13 @@ const storeSchema = new mongoose.Schema({
     }
 });
 
+// Define indexes
+// index these fields as text so we can search within
+storeSchema.index({
+    name: 'text',
+    description: 'text'
+});
+
 // make this async to see if stores with slug already exists
 storeSchema.pre('save', async function(next){ // pure function needed because we need this to be equal to be store that we are trying to save
     if(!this.isModified('name')){ // if stores name is not modified, just skip
